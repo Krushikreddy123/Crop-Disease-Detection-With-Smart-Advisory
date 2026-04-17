@@ -91,6 +91,13 @@ function renderPrediction(data) {
   renderMedia(data);
 }
 
+// Hide stale results when the current upload is invalid or fails.
+function clearPrediction() {
+  resultsShell.hidden = true;
+  advisoryCard.hidden = true;
+  lastSpeechText = "";
+}
+
 // Handle the Predict button click and connect the UI to the API.
 async function handlePredictClick() {
   const file = imageInput.files[0];
@@ -105,6 +112,7 @@ async function handlePredictClick() {
     renderPrediction(data);
     statusMessage.innerText = "Prediction completed.";
   } catch (error) {
+    clearPrediction();
     statusMessage.innerText = error.message || "Prediction failed.";
     alert(error.message || "Prediction failed");
   } finally {

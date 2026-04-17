@@ -183,6 +183,13 @@ def enrich_farmer_advisory(class_name, confidence, advisory_payload, healthy):
             prevention.append(item)
 
     recommendation = recommendation_library(class_name)
+    default_safety = [
+        "Wear gloves, mask and full sleeves during mixing and spraying.",
+        "Do not spray during strong wind or peak afternoon heat.",
+        "Keep children, animals and food items away from the spray area.",
+        "Follow re-entry and pre-harvest interval mentioned on the product label.",
+    ]
+
     advisory_payload.update({
         "crop_name": extract_crop_name(class_name),
         "disease_name": normalize_disease_name(class_name),
@@ -193,7 +200,7 @@ def enrich_farmer_advisory(class_name, confidence, advisory_payload, healthy):
         "chemical_treatment": recommendation["chemical_treatment"],
         "organic_treatment": recommendation["organic_treatment"],
         "recommended_fungicides_or_pesticides": recommendation["recommended"],
-        "best_spray_time": advisory_payload.get("best_spray_time") or best_spray_time_from_severity(advisory_payload.get("severity_level", get_severity_band(confidence))),
+        "best_spray_time": advisory_payload.get("best_spray_time") or recommendation.get("best_spray_time") or best_spray_time_from_severity(advisory_payload.get("severity_level", get_severity_band(confidence))),
         "dosage": advisory_payload.get("dosage") or recommendation["dosage"],
         "irrigation_advice": advisory_payload.get("irrigation_advice") or recommendation["irrigation"],
         "fertilizer_advice": advisory_payload.get("fertilizer_advice") or recommendation["fertilizer"],
@@ -202,6 +209,6 @@ def enrich_farmer_advisory(class_name, confidence, advisory_payload, healthy):
         "next_7_days_prediction": advisory_payload.get("next_7_days_prediction") or recommendation["prediction"],
         "prevention": prevention[:5],
         "sources": advisory_payload.get("sources") or fallback_source_links(class_name),
-        "safety_precautions": ["Wear gloves, mask and full sleeves during mixing and spraying.", "Do not spray during strong wind or peak afternoon heat.", "Keep children, animals and food items away from the spray area.", "Follow re-entry and pre-harvest interval mentioned on the product label."],
+        "safety_precautions": advisory_payload.get("safety_precautions") or recommendation.get("safety_precautions") or default_safety,
     })
     return advisory_payload
