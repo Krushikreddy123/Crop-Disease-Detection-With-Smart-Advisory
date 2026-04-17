@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Crop Disease Detection</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h2>Crop Disease Detection</h2>
+
+<select id="langSelect">
+  <option value="en">English</option>
+  <option value="te">తెలుగు</option>
+</select>
+
+<br><br>
+
+<input type="file" id="image">
+<button id="predictBtn">Predict</button>
+
+<p id="result"></p>
+
+<img id="leaf" width="250">
+
+<div id="heatmapBox" style="display:none;">
+  <h3>Grad-CAM</h3>
+  <img id="heatmap" width="250">
+</div>
+
+<ul id="advice"></ul>
+
+<script src="/static/script.js"></script>
+<div class="gtranslate_wrapper"></div>
+<script>window.gtranslateSettings = {"default_language":"en","native_language_names":true,"detect_browser_language":true,"languages":["en","fr","it",,"te","hi","ta","kn"],"wrapper_selector":".gtranslate_wrapper"}</script>
+<script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
+</body>
+</html>
