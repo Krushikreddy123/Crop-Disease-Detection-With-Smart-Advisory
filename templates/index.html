@@ -1,37 +1,194 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crop Disease Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Agriculture Intelligence Dashboard</p>
+        <h1>Crop Disease Detection</h1>
+        <p class="subcopy">Upload a leaf image to get a structured disease explanation, treatment guidance, and risk outlook.</p>
+      </div>
+      <div class="gtranslate_wrapper"></div>
+    </header>
 
-<h2>Crop Disease Detection</h2>
+    <section class="upload-panel">
+      <div class="control-group file-group">
+        <label for="image">Leaf Image</label>
+        <input type="file" id="image" accept="image/*">
+      </div>
 
-<select id="langSelect">
-  <option value="en">English</option>
-  <option value="te">తెలుగు</option>
-</select>
+      <button id="predictBtn" type="button">
+        <span class="button-text">Predict</span>
+        <span class="spinner" aria-hidden="true"></span>
+      </button>
+    </section>
 
-<br><br>
+    <p id="statusMessage" class="status-line"></p>
 
-<input type="file" id="image">
-<button id="predictBtn">Predict</button>
+    <section id="resultsShell" class="results-shell" hidden>
+      <section id="advisoryCard" class="hero-card" hidden>
+        <div class="hero-copy">
+          <p class="eyebrow">Detection Summary</p>
+          <p id="cropName" class="crop-line"></p>
+          <h2 id="diseaseName"></h2>
+        </div>
+        <div class="hero-metrics">
+          <div class="metric-pill">
+            <span class="metric-label">Confidence</span>
+            <span id="confidenceBadge" class="metric-value"></span>
+          </div>
+          <div id="severityBadge" class="badge severity-badge"></div>
+        </div>
+      </section>
 
-<p id="result"></p>
+      <section class="image-grid">
+        <article class="media-card">
+          <div class="media-header">
+            <h3>Input Leaf</h3>
+            <span class="media-tag">Original</span>
+          </div>
+          <img id="leaf" alt="Uploaded leaf image">
+        </article>
 
-<img id="leaf" width="250">
+        <article id="heatmapBox" class="media-card" style="display:none;">
+          <div class="media-header">
+            <h3>Affected Region</h3>
+            <span class="media-tag">Grad-CAM</span>
+          </div>
+          <img id="heatmap" alt="Affected region heatmap">
+        </article>
+      </section>
 
-<div id="heatmapBox" style="display:none;">
-  <h3>Grad-CAM</h3>
-  <img id="heatmap" width="250">
-</div>
+      <section class="section-divider">
+        <span>AI Advisory</span>
+      </section>
 
-<ul id="advice"></ul>
+      <section class="ai-note-block">
+        <div class="section-title-row">
+          <h3>🌿Advisory Note</h3>
+          <div class="note-actions">
+            <span class="system-badge">Advisory generated from intelligent knowledge system</span>
+            <button id="speakAdvisoryBtn" type="button" class="secondary-button">Speak</button>
+            <button id="stopVoiceBtn" type="button" class="secondary-button">Stop</button>
+          </div>
+        </div>
+        <ul id="aiNoteList" class="note-list"></ul>
+      </section>
 
-<script src="/static/script.js"></script>
-<div class="gtranslate_wrapper"></div>
-<script>window.gtranslateSettings = {"default_language":"en","native_language_names":true,"detect_browser_language":true,"languages":["en","fr","it",,"te","hi","ta","kn"],"wrapper_selector":".gtranslate_wrapper"}</script>
-<script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
+      <section class="section-divider">
+        <span>Disease Advisory Cards</span>
+      </section>
+
+      <section class="advisory-grid">
+        <article class="info-card">
+          <div class="card-title">🧪 Cause</div>
+          <ul id="causeList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">🔍 Symptoms</div>
+          <ul id="symptomsList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">💬 Treatment Overview</div>
+          <ul id="treatmentSummaryList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">💊 Chemical Treatment</div>
+          <ul id="chemicalTreatmentList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">🌿 Organic Treatment</div>
+          <ul id="organicTreatmentList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">🛡️ Prevention</div>
+          <ul id="preventionList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">⏰ Best Spray Time</div>
+          <ul id="sprayTimeList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">🧴 Recommended Products</div>
+          <ul id="recommendedList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">📏 Dosage</div>
+          <ul id="dosageList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">💧 Irrigation Advice</div>
+          <ul id="irrigationList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">🌱 Fertilizer Advice</div>
+          <ul id="fertilizerList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">☁️ Weather Precautions</div>
+          <ul id="weatherList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">📈 Spread Risk</div>
+          <ul id="spreadRiskList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">🗓️ Next 7 Days Prediction</div>
+          <ul id="predictionList"></ul>
+        </article>
+
+        <article class="info-card">
+          <div class="card-title">⚠️ Safety</div>
+          <ul id="safetyList"></ul>
+        </article>
+
+        <article class="info-card link-card">
+          <div class="card-title">🛒 Buy Links</div>
+          <ul id="productList"></ul>
+        </article>
+
+        <article class="info-card link-card">
+          <div class="card-title">🔗 Sources</div>
+          <ul id="advisoryLinks"></ul>
+        </article>
+      </section>
+    </section>
+  </div>
+
+  <script src="/static/js/utils.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/ui.js"></script>
+  <script>
+    window.gtranslateSettings = {
+      "default_language": "en",
+      "native_language_names": true,
+      "detect_browser_language": true,
+      "languages": ["en", "fr", "it", "te", "hi", "ta", "kn"],
+      "wrapper_selector": ".gtranslate_wrapper"
+    };
+  </script>
+  <script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
 </body>
 </html>
