@@ -20,8 +20,18 @@ function setLoadingState(isLoading) {
 function renderHero(advisory, data) {
   const severity = (advisory.severity_level || "low").toLowerCase();
   const severityBadge = document.getElementById("severityBadge");
+  const cropBits = [];
 
-  document.getElementById("cropName").innerText = advisory.crop_name ? `Crop: ${advisory.crop_name}` : "Crop analysis";
+  if (advisory.crop_name) {
+    cropBits.push(`Crop: ${advisory.crop_name}`);
+  } else {
+    cropBits.push("Crop analysis");
+  }
+  if (advisory.location_label) {
+    cropBits.push(`Forecast: ${advisory.location_label}`);
+  }
+
+  document.getElementById("cropName").innerText = cropBits.join(" | ");
   document.getElementById("diseaseName").innerText = advisory.disease_name || data.class;
   document.getElementById("confidenceBadge").innerText = `${data.confidence}%`;
 
@@ -29,19 +39,19 @@ function renderHero(advisory, data) {
   severityBadge.innerText = `${(advisory.severity || severity).toString()} Severity`;
 }
 
-// Render the AI note as short bullets.
+// Render the advisory note as short bullets.
 function renderAiNote(advisory, data) {
   const aiBullets = splitNoteIntoBullets(
     advisory.advisory_note || data.ai_note,
-    "No AI advisory note is available."
+    "No advisory note is available."
   ).map(emphasizeActions);
 
   lastSpeechText = splitNoteIntoBullets(
     advisory.advisory_note || data.ai_note,
-    "No AI advisory note is available."
+    "No advisory note is available."
   ).join(" ");
 
-  renderList("aiNoteList", aiBullets, "No AI advisory note is available.", true);
+  renderList("aiNoteList", aiBullets, "No advisory note is available.", true);
 }
 
 // Render all advisory cards from the response payload.
@@ -108,9 +118,16 @@ async function handlePredictClick() {
 
   try {
     setLoadingState(true);
-    const data = await predictLeaf(file);
+    statusMessage.innerText = "Checking location for live weather advisory...";
+    const location = await getCurrentCoordinates();
+    statusMessage.innerText = location
+      ? "Running detection with live weather advisory..."
+      : "Running detection with local advisory fallback...";
+    const data = await predictLeaf(file, location);
     renderPrediction(data);
-    statusMessage.innerText = "Prediction completed.";
+    statusMessage.innerText = data.advisory_source === "free-dynamic-weather"
+      ? "Prediction completed with live weather data."
+      : "Prediction completed.";
   } catch (error) {
     clearPrediction();
     statusMessage.innerText = error.message || "Prediction failed.";
